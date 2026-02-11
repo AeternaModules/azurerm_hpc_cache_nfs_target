@@ -26,10 +26,10 @@ EOT
     verification_timer_in_seconds = optional(number)
     write_back_timer_in_seconds   = optional(number)
     namespace_junction = list(object({
-      access_policy_name = optional(string, "default")
+      access_policy_name = optional(string) # Default: "default"
       namespace_path     = string
       nfs_export         = string
-      target_path        = optional(string, "")
+      target_path        = optional(string) # Default: ""
     }))
   }))
   validation {
