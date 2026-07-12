@@ -1,3 +1,7 @@
+output "hpc_cache_nfs_targets_id" {
+  description = "Map of id values across all hpc_cache_nfs_targets, keyed the same as var.hpc_cache_nfs_targets"
+  value       = { for k, v in azurerm_hpc_cache_nfs_target.hpc_cache_nfs_targets : k => v.id }
+}
 output "hpc_cache_nfs_targets_cache_name" {
   description = "Map of cache_name values across all hpc_cache_nfs_targets, keyed the same as var.hpc_cache_nfs_targets"
   value       = { for k, v in azurerm_hpc_cache_nfs_target.hpc_cache_nfs_targets : k => v.cache_name }
