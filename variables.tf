@@ -26,10 +26,10 @@ EOT
     verification_timer_in_seconds = optional(number)
     write_back_timer_in_seconds   = optional(number)
     namespace_junction = list(object({
-      access_policy_name = optional(string) # Default: "default"
+      access_policy_name = optional(string)
       namespace_path     = string
       nfs_export         = string
-      target_path        = optional(string) # Default: ""
+      target_path        = optional(string)
     }))
   }))
   validation {
@@ -39,46 +39,6 @@ EOT
       )
     ])
     error_message = "Each namespace_junction list must contain between 1 and 10 items"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.hpc_cache_nfs_targets : (
-        length(v.cache_name) > 0
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.hpc_cache_nfs_targets : (
-        length(v.target_host_name) > 0
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.hpc_cache_nfs_targets : (
-        contains(["READ_HEAVY_INFREQ", "READ_HEAVY_CHECK_180", "READ_ONLY", "READ_WRITE", "WRITE_WORKLOAD_15", "WRITE_AROUND", "WRITE_WORKLOAD_CHECK_30", "WRITE_WORKLOAD_CHECK_60", "WRITE_WORKLOAD_CLOUDWS"], v.usage_model)
-      )
-    ])
-    error_message = "must be one of: READ_HEAVY_INFREQ, READ_HEAVY_CHECK_180, READ_ONLY, READ_WRITE, WRITE_WORKLOAD_15, WRITE_AROUND, WRITE_WORKLOAD_CHECK_30, WRITE_WORKLOAD_CHECK_60, WRITE_WORKLOAD_CLOUDWS"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.hpc_cache_nfs_targets : (
-        v.verification_timer_in_seconds == null || (v.verification_timer_in_seconds >= 1 && v.verification_timer_in_seconds <= 31536000)
-      )
-    ])
-    error_message = "must be between 1 and 31536000"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.hpc_cache_nfs_targets : (
-        v.write_back_timer_in_seconds == null || (v.write_back_timer_in_seconds >= 1 && v.write_back_timer_in_seconds <= 31536000)
-      )
-    ])
-    error_message = "must be between 1 and 31536000"
   }
   # --- Unconfirmed validation candidates, derived from azurerm_hpc_cache_nfs_target's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
@@ -102,6 +62,9 @@ EOT
   #   source:    [from resourcegroups.ValidateName: invalid when len(value) == 0]
   # path: resource_group_name
   #   source:    [from resourcegroups.ValidateName] !matched
+  # path: cache_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
   # path: namespace_junction.namespace_path
   #   source:    validate.CacheNamespacePath: no recognizable `if ... { errors = append(...) }` pattern - read it by hand
   # path: namespace_junction.nfs_export
@@ -111,5 +74,17 @@ EOT
   # path: namespace_junction.access_policy_name
   #   condition: length(value) > 0
   #   message:   must not be empty
+  # path: target_host_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: usage_model
+  #   condition: contains(["READ_HEAVY_INFREQ", "READ_HEAVY_CHECK_180", "READ_ONLY", "READ_WRITE", "WRITE_WORKLOAD_15", "WRITE_AROUND", "WRITE_WORKLOAD_CHECK_30", "WRITE_WORKLOAD_CHECK_60", "WRITE_WORKLOAD_CLOUDWS"], value)
+  #   message:   must be one of: READ_HEAVY_INFREQ, READ_HEAVY_CHECK_180, READ_ONLY, READ_WRITE, WRITE_WORKLOAD_15, WRITE_AROUND, WRITE_WORKLOAD_CHECK_30, WRITE_WORKLOAD_CHECK_60, WRITE_WORKLOAD_CLOUDWS
+  # path: verification_timer_in_seconds
+  #   condition: value >= 1 && value <= 31536000
+  #   message:   must be between 1 and 31536000
+  # path: write_back_timer_in_seconds
+  #   condition: value >= 1 && value <= 31536000
+  #   message:   must be between 1 and 31536000
 }
 
